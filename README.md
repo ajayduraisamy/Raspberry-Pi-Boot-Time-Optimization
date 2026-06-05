@@ -136,7 +136,4 @@ Through this project, I learned:
 
 ---
 
-## Author
-
-Embedded Linux Learning Project using Raspberry Pi.
 

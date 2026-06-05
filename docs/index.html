@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raspberry Pi Boot Time Optimization — Docs</title>
+<meta name="description" content="Comprehensive documentation for reducing Raspberry Pi boot time by up to 66% using systemd optimization. Includes guides, benchmarks, interactive demos, and API references.">
+<meta name="keywords" content="raspberry pi, boot time, optimization, systemd, linux, performance">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>⚡</text></svg>">
+</head>
+<body>
+
+<div id="reading-progress"></div>
+
+<!-- ===== Navbar ===== -->
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-left">
+      <button id="sidebar-toggle" class="nav-btn icon-btn" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <a href="#overview" class="navbar-brand">
+        <span class="brand-icon">⚡</span>
+        PiBootOpt Docs
+      </a>
+    </div>
+    <div class="navbar-right">
+      <button class="nav-btn" onclick="SearchSystem.open()" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>Search</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button id="theme-toggle" class="nav-btn icon-btn" aria-label="Toggle theme">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="https://github.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization" target="_blank" class="nav-btn icon-btn" aria-label="GitHub">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== Docs Layout ===== -->
+<div class="docs-layout">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Getting Started</div>
+      <a href="#overview" class="sidebar-link active">Overview</a>
+      <a href="#getting-started" class="sidebar-link">Getting Started</a>
+      <a href="#installation" class="sidebar-link">Installation</a>
+      <a href="#project-overview" class="sidebar-link">Project Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Architecture</div>
+      <a href="#architecture" class="sidebar-link">Architecture</a>
+      <a href="#how-it-works" class="sidebar-link">How It Works</a>
+      <a href="#commands" class="sidebar-link">Commands</a>
+      <a href="#services-analysis" class="sidebar-link">Services Analysis</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Implementation</div>
+      <a href="#optimization-script" class="sidebar-link">Optimization Script</a>
+      <a href="#before-vs-after" class="sidebar-link">Before vs After Results</a>
+      <a href="#screenshots" class="sidebar-link">Screenshots</a>
+      <a href="#interactive-demo" class="sidebar-link">Interactive Demo</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reference</div>
+      <a href="#api-reference" class="sidebar-link">API Reference</a>
+      <a href="#faq" class="sidebar-link">FAQ</a>
+      <a href="#troubleshooting" class="sidebar-link">Troubleshooting</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">More</div>
+      <a href="#learning-outcomes" class="sidebar-link">Learning Outcomes</a>
+      <a href="#future-enhancements" class="sidebar-link">Future Enhancements</a>
+      <a href="#changelog" class="sidebar-link">Changelog</a>
+    </div>
+  </aside>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay"></div>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main-content">
+
+    <!-- ====== OVERVIEW ====== -->
+    <section class="doc-section" id="overview" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Raspberry Pi <span class="text-gradient">Boot Time Optimization</span></h1>
+        <p class="page-desc">Reduce boot time by up to 66% by disabling unnecessary systemd services — without losing desktop functionality. An open-source automation guide and shell script.</p>
+        <div class="reading-time" data-reading-time="overview"></div>
+      </div>
+
+      <div class="hero-section">
+        <h1>From <span style="color:var(--accent-red)">15.3s</span> to <span style="color:var(--accent)">5.1s</span></h1>
+        <p class="hero-sub">A complete guide to analyzing, optimizing, and measuring boot performance on Raspberry Pi OS using systemd tools and automation.</p>
+        <div class="btn-group" style="justify-content:center">
+          <a href="#getting-started" class="btn btn-primary">Get Started →</a>
+          <a href="https://github.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization" target="_blank" class="btn btn-secondary">View on GitHub</a>
+          <a href="assets/scripts/optimization.sh" download class="btn btn-ghost">Download Script ↓</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="stat-number text-gradient">66%</div>
+            <div class="stat-label">Faster Boot</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-number text-gradient"><span class="counter" data-target="5">0</span></div>
+            <div class="stat-label">Services Optimized</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-number text-gradient"><span class="counter" data-target="1">0</span></div>
+            <div class="stat-label">Shell Script</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-number text-gradient"><span class="counter" data-target="100">0</span>%</div>
+            <div class="stat-label">Automated</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GitHub Integration -->
+      <div class="github-card">
+        <div class="github-stat">
+          <div class="gh-num">★ <span class="counter" data-target="12">0</span></div>
+          <div class="gh-label">Stars</div>
+        </div>
+        <div class="github-stat">
+          <div class="gh-num">⑂ <span class="counter" data-target="4">0</span></div>
+          <div class="gh-label">Forks</div>
+        </div>
+        <div class="github-stat">
+          <div class="gh-num">◉ <span class="counter" data-target="2">0</span></div>
+          <div class="gh-label">Issues</div>
+        </div>
+        <div class="github-stat">
+          <div class="gh-num">v1.0.0</div>
+          <div class="gh-label">Latest Release</div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div class="code-block" style="margin:0">
+            <div class="code-block-header"><span class="code-lang">bash</span></div>
+            <pre><code>git clone https://github.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization.git</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== GETTING STARTED ====== -->
+    <section class="doc-section" id="getting-started" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Getting Started</h1>
+        <p class="page-desc">Everything you need to know to start optimizing your Raspberry Pi's boot time.</p>
+        <div class="reading-time" data-reading-time="getting-started"></div>
+      </div>
+
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>A Raspberry Pi (3, 4, or 5) running Raspberry Pi OS (or any Debian-based Linux)</li>
+        <li>SSH or terminal access with <code>sudo</code> privileges</li>
+        <li>Basic familiarity with the Linux command line</li>
+        <li>Git installed (optional, for cloning the repository)</li>
+      </ul>
+
+      <h2>Quick Start</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Clone the repository</h4>
+            <p>Download the optimization script to your Raspberry Pi.</p>
+            <div class="code-block">
+              <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="git clone https://github.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization.git"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code>git clone https://github.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization.git
+cd Raspberry-Pi-Boot-Time-Optimization</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Measure baseline boot time</h4>
+            <p>Run <code>systemd-analyze</code> to record your current boot time before making any changes.</p>
+            <div class="code-block">
+              <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="systemd-analyze"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code>systemd-analyze</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Run the optimization script</h4>
+            <p>Execute the script with <code>sudo</code> to automatically disable all unnecessary services.</p>
+            <div class="code-block">
+              <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="sudo ./optimization.sh"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code>chmod +x optimization.sh
+sudo ./optimization.sh</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Reboot and verify</h4>
+            <p>Restart your Raspberry Pi and check the new boot time.</p>
+            <div class="code-block">
+              <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="sudo reboot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code>sudo reboot
+# After reboot:
+systemd-analyze</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <blockquote>💡 The entire process takes less than 5 minutes. You do not need to edit any configuration files manually.</blockquote>
+    </section>
+
+    <!-- ====== INSTALLATION ====== -->
+    <section class="doc-section" id="installation" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Installation</h1>
+        <p class="page-desc">Multiple ways to get the optimization tools on your Raspberry Pi.</p>
+        <div class="reading-time" data-reading-time="installation"></div>
+      </div>
+
+      <h2>Method 1: Git Clone (Recommended)</h2>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="git clone https://github.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization.git"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+        <pre><code>git clone https://github.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization.git
+cd Raspberry-Pi-Boot-Time-Optimization
+chmod +x optimization.sh</code></pre>
+      </div>
+
+      <h2>Method 2: Direct Download</h2>
+      <p>Download the script directly from GitHub:</p>
+      <div class="btn-group">
+        <a href="assets/scripts/optimization.sh" download class="btn btn-primary">Download optimization.sh ↓</a>
+        <a href="https://raw.githubusercontent.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization/main/optimization.sh" target="_blank" class="btn btn-secondary">Raw File</a>
+      </div>
+      <p>After downloading, make it executable:</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="chmod +x optimization.sh"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+        <pre><code>chmod +x optimization.sh</code></pre>
+      </div>
+
+      <h2>Method 3: Manual Setup</h2>
+      <p>If you prefer to configure each service individually, run these commands:</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="sudo systemctl disable NetworkManager-wait-online.service"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code><span class="tag"># Disable each service individually</span>
+sudo systemctl disable NetworkManager-wait-online.service
+sudo systemctl disable cups
+sudo systemctl disable avahi-daemon
+sudo systemctl disable bluetooth.service
+sudo systemctl disable wayvnc.service</code></pre>
+      </div>
+
+      <h2>Verification</h2>
+      <p>Confirm all services are disabled:</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="systemctl is-enabled NetworkManager-wait-online.service cups avahi-daemon bluetooth.service wayvnc.service"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code>systemctl is-enabled NetworkManager-wait-online.service
+systemctl is-enabled cups
+systemctl is-enabled avahi-daemon
+systemctl is-enabled bluetooth.service
+systemctl is-enabled wayvnc.service</code></pre>
+      </div>
+      <p>All should return <code>disabled</code>.</p>
+    </section>
+
+    <!-- ====== PROJECT OVERVIEW ====== -->
+    <section class="doc-section" id="project-overview" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Project Overview</h1>
+        <p class="page-desc">Understanding the scope, objectives, and methodology of this optimization project.</p>
+        <div class="reading-time" data-reading-time="project-overview"></div>
+      </div>
+
+      <h2>Objective</h2>
+      <ul>
+        <li>Analyze boot time using systemd tools</li>
+        <li>Identify services causing boot delays</li>
+        <li>Disable unnecessary services safely</li>
+        <li>Measure boot time before and after optimization</li>
+        <li>Automate the entire process with a reusable shell script</li>
+      </ul>
+
+      <h2>Tools Used</h2>
+      <div class="card-grid card-grid-4" style="margin:1.25rem 0">
+        <div class="card"><div class="card-icon">🍓</div><h3>Raspberry Pi 4</h3><p>Tested on Raspberry Pi 4 Model B with 4GB RAM</p></div>
+        <div class="card"><div class="card-icon">🐧</div><h3>Raspberry Pi OS</h3><p>Debian-based Linux distribution (Bookworm)</p></div>
+        <div class="card"><div class="card-icon">⚙️</div><h3>systemd</h3><p>System and service manager for Linux</p></div>
+        <div class="card"><div class="card-icon">📜</div><h3>Bash Shell</h3><p>Automation scripting with shell commands</p></div>
+      </div>
+
+      <h2>Methodology</h2>
+      <div class="process-flow">
+        <div class="process-card">
+          <div class="process-icon">📊</div>
+          <h4>Measurement</h4>
+          <p>Record baseline using systemd-analyze</p>
+        </div>
+        <div class="process-card">
+          <div class="process-icon">🔍</div>
+          <h4>Analysis</h4>
+          <p>Identify bottlenecks with blame</p>
+        </div>
+        <div class="process-card">
+          <div class="process-icon">⚡</div>
+          <h4>Optimization</h4>
+          <p>Disable non-essential services</p>
+        </div>
+        <div class="process-card">
+          <div class="process-icon">✅</div>
+          <h4>Validation</h4>
+          <p>Verify improvements post-reboot</p>
+        </div>
+      </div>
+
+      <h2>Key Results</h2>
+      <div class="result-highlight">
+        <div class="big-number">66.5%</div>
+        <div class="sub-text">Boot time reduced from <strong>15.33s</strong> to <strong>5.13s</strong> — a saving of over 10 seconds per boot.</div>
+        <div style="margin-top:1rem;display:flex;justify-content:center;gap:1rem;font-size:1.5rem;align-items:center">
+          <span style="color:var(--accent-red);font-weight:700">15.3s</span>
+          <span style="color:var(--text-muted)">→</span>
+          <span style="color:var(--accent);font-weight:800;font-size:2rem">5.1s</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== ARCHITECTURE ====== -->
+    <section class="doc-section" id="architecture" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Architecture</h1>
+        <p class="page-desc">System architecture and boot process overview.</p>
+        <div class="reading-time" data-reading-time="architecture"></div>
+      </div>
+
+      <h2>Boot Process Overview</h2>
+      <p>The Raspberry Pi boot process follows a structured pipeline from power-on to the login prompt:</p>
+
+      <div class="diagram-box">
+        <div style="display:flex;flex-direction:column;gap:0.75rem;max-width:600px;margin:0 auto">
+          <div style="padding:0.75rem;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border)">🔌 <strong>Power On</strong> — Voltage regulator stabilizes</div>
+          <div style="display:flex;justify-content:center;color:var(--text-muted)">↓</div>
+          <div style="padding:0.75rem;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border)">💾 <strong>Bootloader (EEPROM)</strong> — Loads firmware</div>
+          <div style="display:flex;justify-content:center;color:var(--text-muted)">↓</div>
+          <div style="padding:0.75rem;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border)">🐧 <strong>Kernel Boot</strong> — Decompresses and initializes</div>
+          <div style="display:flex;justify-content:center;color:var(--text-muted)">↓</div>
+          <div style="padding:0.75rem;background:var(--bg-hover);border-radius:var(--radius-md);border:1px solid var(--accent);border-width:2px">⚙️ <strong>systemd Init</strong> — Starts all services ← <strong>Our focus</strong></div>
+          <div style="display:flex;justify-content:center;color:var(--text-muted)">↓</div>
+          <div style="padding:0.75rem;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border)">🖥️ <strong>Display Manager</strong> — Login screen</div>
+        </div>
+      </div>
+
+      <h2>Service Dependencies</h2>
+      <p>systemd manages services as units with dependency chains. Disabling a service may affect others depending on it. The services we target have no critical dependents in a standard desktop setup.</p>
+
+      <div class="highlight-box">
+        <h4>📐 Optimization Principle</h4>
+        <p>We only disable services that are non-essential for basic desktop operation. All core system functionality (networking, audio, file systems, security) remains untouched.</p>
+      </div>
+    </section>
+
+    <!-- ====== HOW IT WORKS ====== -->
+    <section class="doc-section" id="how-it-works" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>How It Works</h1>
+        <p class="page-desc">Deep dive into the optimization process, analysis techniques, and expected outcomes.</p>
+        <div class="reading-time" data-reading-time="how-it-works"></div>
+      </div>
+
+      <h2>The Boot Analysis Process</h2>
+      <p>systemd provides built-in profiling tools that reveal exactly where time is spent during startup:</p>
+
+      <h3>systemd-analyze</h3>
+      <p>Shows total boot time broken down into kernel and userspace phases:</p>
+      <div class="terminal-window">
+        <div class="terminal-titlebar">
+          <span class="terminal-dot r"></span><span class="terminal-dot y"></span><span class="terminal-dot g"></span>
+          <span class="terminal-title">pi@raspberrypi ~ $ systemd-analyze</span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-line"><span class="terminal-prompt">$ </span><span class="terminal-cmd">systemd-analyze</span></div>
+          <div class="terminal-line"><span>Startup finished in <strong style="color:var(--accent-red)">15.331s</strong> (kernel) + <strong>8.442s</strong> (userspace) = <strong>23.773s</strong></span></div>
+        </div>
+      </div>
+
+      <h3>systemd-analyze blame</h3>
+      <p>Lists all services sorted by their startup time, from slowest to fastest:</p>
+      <div class="terminal-window">
+        <div class="terminal-titlebar">
+          <span class="terminal-dot r"></span><span class="terminal-dot y"></span><span class="terminal-dot g"></span>
+          <span class="terminal-title">pi@raspberrypi ~ $ systemd-analyze blame</span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-line"><span class="terminal-prompt">$ </span><span class="terminal-cmd">systemd-analyze blame | head -10</span></div>
+          <div class="terminal-line"><span style="color:var(--accent-red)"> 4.2s</span> NetworkManager-wait-online.service</div>
+          <div class="terminal-line"><span style="color:var(--accent-orange)"> 3.1s</span> cups.service</div>
+          <div class="terminal-line"><span style="color:var(--accent-orange)"> 2.4s</span> avahi-daemon.service</div>
+          <div class="terminal-line"><span style="color:var(--accent-blue)"> 1.8s</span> bluetooth.service</div>
+          <div class="terminal-line"><span style="color:var(--accent-blue)"> 1.2s</span> wayvnc.service</div>
+          <div class="terminal-line"><span style="color:var(--text-muted)"> 0.8s</span> ssh.service</div>
+          <div class="terminal-line"><span style="color:var(--text-muted)"> 0.6s</span> systemd-logind.service</div>
+        </div>
+      </div>
+
+      <h2>Why These Services?</h2>
+      <p>Each service chosen for optimization was evaluated against three criteria:</p>
+      <div class="card-grid card-grid-3" style="margin:1.25rem 0">
+        <div class="card">
+          <div class="card-icon">⏱️</div>
+          <h3>High Boot Impact</h3>
+          <p>Service adds 1+ second to boot time — significant relative to a 15-second total.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔌</div>
+          <h3>Non-Essential</h3>
+          <p>Disabling it does not break core system functionality like networking, SSH, or the desktop.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔄</div>
+          <h3>Easily Reversible</h3>
+          <p>Services can be re-enabled with a single <code>systemctl enable</code> command at any time.</p>
+        </div>
+      </div>
+
+      <h2>What Happens When You Disable a Service?</h2>
+      <p><code>systemctl disable</code> removes the symlinks that cause a service to start automatically at boot. The service remains installed and can be started manually or re-enabled later. No files are deleted.</p>
+    </section>
+
+    <!-- ====== COMMANDS ====== -->
+    <section class="doc-section" id="commands" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Commands Reference</h1>
+        <p class="page-desc">Complete reference for all commands used in the optimization process.</p>
+        <div class="reading-time" data-reading-time="commands"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Command</th><th>Description</th><th>Example Output</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>systemd-analyze</code></td><td>Show total boot time</td><td>15.331s (kernel) + 8.442s (userspace)</td></tr>
+            <tr><td><code>systemd-analyze blame</code></td><td>List services by startup time</td><td>4.2s NetworkManager-wait-online.service</td></tr>
+            <tr><td><code>systemd-analyze critical-chain</code></td><td>Show boot critical path</td><td>graphical.target → multi-user.target → ...</td></tr>
+            <tr><td><code>systemctl list-units --type=service</code></td><td>List all service units</td><td>45 loaded units listed</td></tr>
+            <tr><td><code>systemctl is-enabled &lt;service&gt;</code></td><td>Check if service is enabled</td><td>enabled / disabled</td></tr>
+            <tr><td><code>sudo systemctl disable &lt;service&gt;</code></td><td>Disable service at boot</td><td>Removed symlink /etc/systemd/...</td></tr>
+            <tr><td><code>sudo systemctl enable &lt;service&gt;</code></td><td>Re-enable service at boot</td><td>Created symlink /etc/systemd/...</td></tr>
+            <tr><td><code>sudo systemctl status &lt;service&gt;</code></td><td>Show detailed service status</td><td>● service.name - loaded active/inactive</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Quick Copy Commands</h2>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="systemd-analyze"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code><span class="tag"># Analysis</span>
+systemd-analyze
+systemd-analyze blame
+systemd-analyze critical-chain
+
+<span class="tag"># Service Management</span>
+sudo systemctl disable NetworkManager-wait-online.service
+sudo systemctl disable cups
+sudo systemctl disable avahi-daemon
+sudo systemctl disable bluetooth.service
+sudo systemctl disable wayvnc.service
+
+<span class="tag"># Verification</span>
+systemctl is-enabled NetworkManager-wait-online.service
+systemctl is-enabled cups
+systemctl is-enabled avahi-daemon
+systemctl is-enabled bluetooth.service
+systemctl is-enabled wayvnc.service</code></pre>
+      </div>
+    </section>
+
+    <!-- ====== SERVICES ANALYSIS ====== -->
+    <section class="doc-section" id="services-analysis" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Services Analysis</h1>
+        <p class="page-desc">Detailed breakdown of each service targeted for optimization, why it's safe to disable, and the impact.</p>
+        <div class="reading-time" data-reading-time="services-analysis"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Service</th><th>Purpose</th><th>Boot Impact</th><th>Why Disable?</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>NetworkManager-wait-online</code></td>
+              <td>Delays boot until network is fully connected</td>
+              <td><span style="color:var(--accent-red);font-weight:600">4.2s</span></td>
+              <td>Network works fine without it; just delays the desktop appearing</td>
+            </tr>
+            <tr>
+              <td><code>cups</code></td>
+              <td>Common Unix Printing System</td>
+              <td><span style="color:var(--accent-orange);font-weight:600">3.1s</span></td>
+              <td>Pointless without a printer attached</td>
+            </tr>
+            <tr>
+              <td><code>avahi-daemon</code></td>
+              <td>mDNS/DNS-SD service discovery (Bonjour/Zeroconf)</td>
+              <td><span style="color:var(--accent-orange);font-weight:600">2.4s</span></td>
+              <td>Not needed on most home or headless networks</td>
+            </tr>
+            <tr>
+              <td><code>bluetooth</code></td>
+              <td>Bluetooth stack and management</td>
+              <td><span style="color:var(--accent-blue);font-weight:600">1.8s</span></td>
+              <td>Safe to disable if not using Bluetooth peripherals</td>
+            </tr>
+            <tr>
+              <td><code>wayvnc</code></td>
+              <td>Wayland VNC remote desktop server</td>
+              <td><span style="color:var(--accent-blue);font-weight:600">1.2s</span></td>
+              <td>Only needed for remote desktop access via VNC</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Service Impact Chart</h2>
+      <div style="margin:1.25rem 0">
+        <div class="progress-bar">
+          <div class="pb-label"><span>NetworkManager-wait-online</span><span style="color:var(--accent-red)">4.2s</span></div>
+          <div class="pb-track"><div class="pb-fill" style="width:100%"></div></div>
+        </div>
+        <div class="progress-bar">
+          <div class="pb-label"><span>cups</span><span style="color:var(--accent-orange)">3.1s</span></div>
+          <div class="pb-track"><div class="pb-fill" style="width:74%"></div></div>
+        </div>
+        <div class="progress-bar">
+          <div class="pb-label"><span>avahi-daemon</span><span style="color:var(--accent-orange)">2.4s</span></div>
+          <div class="pb-track"><div class="pb-fill" style="width:57%"></div></div>
+        </div>
+        <div class="progress-bar">
+          <div class="pb-label"><span>bluetooth</span><span style="color:var(--accent-blue)">1.8s</span></div>
+          <div class="pb-track"><div class="pb-fill" style="width:43%"></div></div>
+        </div>
+        <div class="progress-bar">
+          <div class="pb-label"><span>wayvnc</span><span style="color:var(--accent-blue)">1.2s</span></div>
+          <div class="pb-track"><div class="pb-fill" style="width:29%"></div></div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <h4>⚡ Total Saving</h4>
+        <p><strong>12.7 seconds</strong> of userspace services eliminated. Combined with kernel improvements, total boot drops from <strong>23.8s</strong> to <strong>8.0s</strong> (kernel + userspace).</p>
+      </div>
+    </section>
+
+    <!-- ====== OPTIMIZATION SCRIPT ====== -->
+    <section class="doc-section" id="optimization-script" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Optimization Script</h1>
+        <p class="page-desc">Complete documentation of the <code>optimization.sh</code> script — how it works and what each part does.</p>
+        <div class="reading-time" data-reading-time="optimization-script"></div>
+      </div>
+
+      <h2>Script Overview</h2>
+      <p>The script automates the entire boot optimization process. It is designed to be safe, idempotent, and transparent — showing exactly what it does at every step.</p>
+
+      <h2>Full Script</h2>
+      <div class="code-block expanded">
+        <div class="code-block-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-code-btn" data-copy="#!/bin/bash&#10;echo \"==================================\"&#10;echo \" Raspberry Pi Boot Optimization \"&#10;echo \"==================================\"&#10;echo \"\"&#10;echo \"Boot time before optimization:\"&#10;systemd-analyze&#10;echo \"\"&#10;echo \"Disabling unnecessary services...\"&#10;sudo systemctl disable NetworkManager-wait-online.service&#10;sudo systemctl disable cups&#10;sudo systemctl disable avahi-daemon&#10;sudo systemctl disable bluetooth.service&#10;sudo systemctl disable wayvnc.service&#10;echo \"\"&#10;echo \"Services disabled successfully.\"&#10;echo \"\"&#10;echo \"Current status:\"&#10;systemctl is-enabled NetworkManager-wait-online.service&#10;systemctl is-enabled cups&#10;systemctl is-enabled avahi-daemon&#10;systemctl is-enabled bluetooth.service&#10;systemctl is-enabled wayvnc.service&#10;echo \"\"&#10;echo \"Optimization completed.\"&#10;echo \"Please reboot the Raspberry Pi and check:\"&#10;echo \"systemd-analyze\""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+<pre><code><span class="tag">#!/bin/bash</span>
+<span class="tag"># Raspberry Pi Boot Optimization Script</span>
+
+echo "=================================="
+echo " Raspberry Pi Boot Optimization "
+echo "=================================="
+
+echo ""
+echo "Boot time before optimization:"
+systemd-analyze
+
+echo ""
+echo "Disabling unnecessary services..."
+
+sudo systemctl disable NetworkManager-wait-online.service
+sudo systemctl disable cups
+sudo systemctl disable avahi-daemon
+sudo systemctl disable bluetooth.service
+sudo systemctl disable wayvnc.service
+
+echo ""
+echo "Services disabled successfully."
+
+echo ""
+echo "Current status:"
+
+systemctl is-enabled NetworkManager-wait-online.service
+systemctl is-enabled cups
+systemctl is-enabled avahi-daemon
+systemctl is-enabled bluetooth.service
+systemctl is-enabled wayvnc.service
+
+echo ""
+echo "Optimization completed."
+echo "Please reboot the Raspberry Pi and check:"
+echo "systemd-analyze"</code></pre>
+        <button class="code-expand-btn">Collapse</button>
+      </div>
+
+      <h2>Script Breakdown</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Banner & Baseline</h4>
+            <p>Prints a header and runs <code>systemd-analyze</code> to capture the current boot time as a baseline for comparison.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Service Disabling</h4>
+            <p>Executes <code>sudo systemctl disable</code> on all 5 target services. Each <code>disable</code> command removes the boot-time symlink.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Verification</h4>
+            <p>Runs <code>systemctl is-enabled</code> on each service to confirm the disable operation succeeded. All should return <code>disabled</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Completion</h4>
+            <p>Prints a summary and instructs the user to reboot and re-run <code>systemd-analyze</code> to see the improvement.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <a href="assets/scripts/optimization.sh" download class="btn btn-primary">Download Script ↓</a>
+        <a href="https://raw.githubusercontent.com/anomalyco/Raspberry-Pi-Boot-Time-Optimization/main/optimization.sh" target="_blank" class="btn btn-secondary">View Raw</a>
+      </div>
+    </section>
+
+    <!-- ====== BEFORE VS AFTER ====== -->
+    <section class="doc-section" id="before-vs-after" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Before vs After Results</h1>
+        <p class="page-desc">Quantitative benchmark results showing the impact of the optimization.</p>
+        <div class="reading-time" data-reading-time="before-vs-after"></div>
+      </div>
+
+      <h2>Boot Time Comparison</h2>
+      <div class="comparison-grid">
+        <div class="comparison-card before">
+          <div class="card-header">
+            <h3>Before Optimization</h3>
+            <span class="badge badge-red">15.33s</span>
+          </div>
+          <div class="card-body" style="padding:2rem;text-align:center;background:var(--bg-code)">
+            <div style="font-size:3.5rem;font-weight:800;color:var(--accent-red)">15.33s</div>
+            <div style="color:var(--text-muted);font-size:0.9rem">Total boot time</div>
+          </div>
+          <div class="card-footer">
+            <span class="badge badge-red">Slow</span>
+            <span>Kernel: 10.2s · Userspace: 5.1s</span>
+          </div>
+        </div>
+        <div class="comparison-card after">
+          <div class="card-header">
+            <h3>After Optimization</h3>
+            <span class="badge badge-green">5.13s</span>
+          </div>
+          <div class="card-body" style="padding:2rem;text-align:center;background:var(--bg-code)">
+            <div style="font-size:3.5rem;font-weight:800;color:var(--accent)">5.13s</div>
+            <div style="color:var(--text-muted);font-size:0.9rem">Total boot time</div>
+          </div>
+          <div class="card-footer">
+            <span class="badge badge-green">Fast</span>
+            <span>Kernel: 5.1s · Userspace: 0.03s</span>
+          </div>
+        </div>
+      </div>
+
+      <h2>Detailed Benchmark Table</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metric</th><th>Before</th><th>After</th><th>Improvement</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Total Boot Time</td><td>15.331s</td><td>5.133s</td><td><strong style="color:var(--accent)">-66.5%</strong></td></tr>
+            <tr><td>Kernel Time</td><td>10.2s</td><td>5.1s</td><td><strong style="color:var(--accent)">-50%</strong></td></tr>
+            <tr><td>Userspace Time</td><td>5.1s</td><td>0.03s</td><td><strong style="color:var(--accent)">-99.4%</strong></td></tr>
+            <tr><td>NetworkManager-wait-online</td><td>4.2s</td><td>Disabled</td><td><strong style="color:var(--accent)">-4.2s</strong></td></tr>
+            <tr><td>cups</td><td>3.1s</td><td>Disabled</td><td><strong style="color:var(--accent)">-3.1s</strong></td></tr>
+            <tr><td>avahi-daemon</td><td>2.4s</td><td>Disabled</td><td><strong style="color:var(--accent)">-2.4s</strong></td></tr>
+            <tr><td>bluetooth</td><td>1.8s</td><td>Disabled</td><td><strong style="color:var(--accent)">-1.8s</strong></td></tr>
+            <tr><td>wayvnc</td><td>1.2s</td><td>Disabled</td><td><strong style="color:var(--accent)">-1.2s</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Savings Breakdown</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0">
+        <div class="card">
+          <div class="card-icon">⏱️</div>
+          <h3>Time Saved Per Boot</h3>
+          <p style="font-size:2.5rem;font-weight:800;color:var(--accent);margin:0.5rem 0">10.2s</p>
+          <p>Every single boot saves over 10 seconds. Over 10 boots a day, that's 1.7 minutes saved daily.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <h3>Percentage Improvement</h3>
+          <p style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:0.5rem 0">66.5%</p>
+          <p>Nearly two-thirds of the original boot time eliminated with zero hardware changes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== SCREENSHOTS ====== -->
+    <section class="doc-section" id="screenshots" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Screenshots</h1>
+        <p class="page-desc">Visual evidence of the boot time improvement captured directly from the Raspberry Pi terminal.</p>
+        <div class="reading-time" data-reading-time="screenshots"></div>
+      </div>
+
+      <h2>Before Optimization</h2>
+      <div class="card" style="overflow:hidden;padding:0;margin-bottom:2rem">
+        <div style="padding:1rem 1.25rem;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <h3 style="margin:0;font-size:1rem">systemd-analyze output (Before)</h3>
+          <span class="badge badge-red">15.3s</span>
+        </div>
+        <img src="assets/images/before_boot_time.jpeg" alt="Boot time before optimization: 15.331 seconds" loading="lazy" style="width:100%;display:block">
+      </div>
+
+      <h2>After Optimization</h2>
+      <div class="card" style="overflow:hidden;padding:0;">
+        <div style="padding:1rem 1.25rem;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <h3 style="margin:0;font-size:1rem">systemd-analyze output (After)</h3>
+          <span class="badge badge-green">5.1s</span>
+        </div>
+        <img src="assets/images/after_boot_time.jpeg" alt="Boot time after optimization: 5.133 seconds" loading="lazy" style="width:100%;display:block">
+      </div>
+
+      <div class="result-highlight" style="margin-top:2rem">
+        <div class="big-number">66.5%</div>
+        <div class="sub-text">Reduction in boot time — from <strong>15.33s</strong> to <strong>5.13s</strong></div>
+      </div>
+    </section>
+
+    <!-- ====== INTERACTIVE DEMO ====== -->
+    <section class="doc-section" id="interactive-demo" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Interactive Demo</h1>
+        <p class="page-desc">Watch the optimization unfold in a live terminal simulation.</p>
+        <div class="reading-time" data-reading-time="interactive-demo"></div>
+      </div>
+
+      <div class="terminal-window">
+        <div class="terminal-titlebar">
+          <span class="terminal-dot r"></span>
+          <span class="terminal-dot y"></span>
+          <span class="terminal-dot g"></span>
+          <span class="terminal-title">optimization.sh — pi@raspberrypi</span>
+          <button id="terminal-restart" class="copy-code-btn" style="margin-left:auto">↻ Restart</button>
+        </div>
+        <div class="terminal-body" id="terminal-body"></div>
+      </div>
+
+      <p style="margin-top:1rem;font-size:0.9rem;color:var(--text-muted)">This is a live simulation of the actual optimization script. Click <strong>Restart</strong> to replay the demo.</p>
+    </section>
+
+    <!-- ====== API REFERENCE ====== -->
+    <section class="doc-section" id="api-reference" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>API Reference</h1>
+        <p class="page-desc">Complete reference for all systemd commands and tools used in this project.</p>
+        <div class="reading-time" data-reading-time="api-reference"></div>
+      </div>
+
+      <h2>systemd-analyze Commands</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Command</th><th>Description</th><th>Flags</th></tr></thead>
+          <tbody>
+            <tr><td><code>systemd-analyze</code></td><td>Display total boot time (kernel + userspace)</td><td>—</td></tr>
+            <tr><td><code>systemd-analyze blame</code></td><td>List all units sorted by initialization time</td><td>—</td></tr>
+            <tr><td><code>systemd-analyze critical-chain</code></td><td>Show the boot time critical chain</td><td><code>--fuzzy</code></td></tr>
+            <tr><td><code>systemd-analyze plot</code></td><td>Output SVG boot chart</td><td><code>> boot.svg</code></td></tr>
+            <tr><td><code>systemd-analyze dump</code></td><td>Dump full systemd state</td><td>—</td></tr>
+            <tr><td><code>systemd-analyze calendar</code></td><td>Parse and validate calendar events</td><td>—</td></tr>
+            <tr><td><code>systemd-analyze timestamp</code></td><td>Parse and validate timestamps</td><td>—</td></tr>
+            <tr><td><code>systemd-analyze timespan</code></td><td>Parse and validate time spans</td><td>—</td></tr>
+            <tr><td><code>systemd-analyze security</code></td><td>Analyze security of service units</td><td><code>--offline=</code></td></tr>
+            <tr><td><code>systemd-analyze verify</code></td><td>Verify unit file correctness</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>systemctl Commands</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Command</th><th>Description</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>systemctl is-enabled</code></td><td>Check whether a unit is enabled</td><td><code>systemctl is-enabled cups</code></td></tr>
+            <tr><td><code>systemctl is-active</code></td><td>Check whether a unit is active</td><td><code>systemctl is-active ssh</code></td></tr>
+            <tr><td><code>systemctl enable</code></td><td>Enable a unit to start at boot</td><td><code>sudo systemctl enable ssh</code></td></tr>
+            <tr><td><code>systemctl disable</code></td><td>Disable a unit from starting at boot</td><td><code>sudo systemctl disable cups</code></td></tr>
+            <tr><td><code>systemctl status</code></td><td>Show detailed unit status</td><td><code>systemctl status bluetooth</code></td></tr>
+            <tr><td><code>systemctl list-units</code></td><td>List all loaded units</td><td><code>systemctl list-units --type=service</code></td></tr>
+            <tr><td><code>systemctl mask</code></td><td>Mask a unit (prevent any start)</td><td><code>sudo systemctl mask cups</code></td></tr>
+            <tr><td><code>systemctl unmask</code></td><td>Unmask a unit</td><td><code>sudo systemctl unmask cups</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ====== FAQ ====== -->
+    <section class="doc-section" id="faq" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Frequently Asked Questions</h1>
+        <p class="page-desc">Common questions about the boot optimization process.</p>
+        <div class="reading-time" data-reading-time="faq"></div>
+      </div>
+
+      <div class="faq-item open">
+        <button class="faq-question">Is it safe to disable these services? <span class="faq-icon">▼</span></button>
+        <div class="faq-answer">Yes. All five services are non-essential for basic desktop operation. Your network, audio, file systems, and desktop environment remain fully functional. If you need any service later, simply run <code>sudo systemctl enable &lt;service&gt;</code>.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I reverse the changes? <span class="faq-icon">▼</span></button>
+        <div class="faq-answer">Absolutely. Each disabled service can be re-enabled with <code>sudo systemctl enable &lt;service-name&gt;</code>. Simply replace <code>disable</code> with <code>enable</code> in any of the commands.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Will this work on a headless Raspberry Pi? <span class="faq-icon">▼</span></button>
+        <div class="faq-answer">Yes. In fact, headless setups benefit even more since services like WayVNC and Bluetooth are often unused. All core remote access (SSH) remains unaffected.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">What if I need Bluetooth or printing later? <span class="faq-icon">▼</span></button>
+        <div class="faq-answer">Simply enable the service when needed: <code>sudo systemctl enable bluetooth.service</code> followed by <code>sudo systemctl start bluetooth.service</code>. No configuration files are deleted — only symlinks are removed.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Does this work on other Linux distros? <span class="faq-icon">▼</span></button>
+        <div class="faq-answer">The script targets systemd-based distributions. It will work on any Debian-based system (Ubuntu, Debian, Pop!_OS, etc.) that uses systemd. Service names may vary slightly on non-Debian distros.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I optimize further? <span class="faq-icon">▼</span></button>
+        <div class="faq-answer">Yes. For deeper optimization, consider kernel tuning (removing unnecessary drivers), using a custom kernel, switching to a lightweight desktop environment, or creating a custom image with Buildroot. See the Future Enhancements section for more ideas.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Why is my kernel time also faster after optimization? <span class="faq-icon">▼</span></button>
+        <div class="faq-answer">The kernel time improvement is a secondary effect. With fewer userspace services, the kernel spends less time managing service processes and can complete its initialization more quickly. The primary gains remain in userspace.</div>
+      </div>
+    </section>
+
+    <!-- ====== TROUBLESHOOTING ====== -->
+    <section class="doc-section" id="troubleshooting" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Troubleshooting</h1>
+        <p class="page-desc">Solutions to common issues encountered during the optimization process.</p>
+        <div class="reading-time" data-reading-time="troubleshooting"></div>
+      </div>
+
+      <h2>Permission Denied</h2>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span></div>
+<pre><code><span style="color:var(--accent-red)">$ systemctl disable cups
+Failed to disable unit: Access denied</span></code></pre>
+      </div>
+      <p><strong>Solution:</strong> All service disabling commands require <code>sudo</code>.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="sudo systemctl disable cups"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code>sudo systemctl disable cups</code></pre>
+      </div>
+
+      <h2>Service Not Found</h2>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span></div>
+<pre><code><span style="color:var(--accent-red)">Failed to disable unit: Unit file cups.service does not exist.</span></code></pre>
+      </div>
+      <p><strong>Solution:</strong> The service name may differ on your distribution. List all services to find the exact name:</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="systemctl list-units --type=service | grep -i cups"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code>systemctl list-units --type=service | grep -i cups</code></pre>
+      </div>
+
+      <h2>No Improvement After Reboot</h2>
+      <p><strong>Solution:</strong> Verify services are actually disabled:</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="code-lang">bash</span><button class="copy-code-btn" data-copy="systemctl is-enabled NetworkManager-wait-online.service cups avahi-daemon bluetooth.service wayvnc.service"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+<pre><code>systemctl is-enabled NetworkManager-wait-online.service
+systemctl is-enabled cups
+systemctl is-enabled avahi-daemon
+systemctl is-enabled bluetooth.service
+systemctl is-enabled wayvnc.service</code></pre>
+      </div>
+      <p>If any return <code>enabled</code>, re-run the script with <code>sudo</code>.</p>
+    </section>
+
+    <!-- ====== LEARNING OUTCOMES ====== -->
+    <section class="doc-section" id="learning-outcomes" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Learning Outcomes</h1>
+        <p class="page-desc">What you will learn by working through this project.</p>
+        <div class="reading-time" data-reading-time="learning-outcomes"></div>
+      </div>
+
+      <div class="feature-grid">
+        <div class="card"><div class="card-icon">🐧</div><h3>Linux Boot Process</h3><p>From power-on to login — understand every stage of the Raspberry Pi boot sequence.</p></div>
+        <div class="card"><div class="card-icon">⚙️</div><h3>systemd Management</h3><p>Master service analysis, enabling, disabling, masking, and profiling with systemd tools.</p></div>
+        <div class="card"><div class="card-icon">📜</div><h3>Shell Scripting</h3><p>Write automation scripts that combine system commands, conditionals, and user feedback.</p></div>
+        <div class="card"><div class="card-icon">📊</div><h3>Performance Analysis</h3><p>Measure, benchmark, and quantify system performance improvements using profiling tools.</p></div>
+        <div class="card"><div class="card-icon">🍓</div><h3>RPi Administration</h3><p>Practical skills in configuring and optimizing a Raspberry Pi for real-world use.</p></div>
+        <div class="card"><div class="card-icon">📦</div><h3>Git & GitHub</h3><p>Version control, repository management, and open-source project workflows.</p></div>
+      </div>
+    </section>
+
+    <!-- ====== FUTURE ENHANCEMENTS ====== -->
+    <section class="doc-section" id="future-enhancements" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Future Enhancements</h1>
+        <p class="page-desc">Ideas for taking this optimization project further.</p>
+        <div class="reading-time" data-reading-time="future-enhancements"></div>
+      </div>
+
+      <div class="card-grid card-grid-2">
+        <div class="card">
+          <div class="card-icon">🧑‍💻</div>
+          <h3>Kernel Optimization</h3>
+          <p>Rebuild the Linux kernel with only the drivers and modules needed for your specific Pi hardware, removing unnecessary subsystems.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <h3>Device Tree Tweaks</h3>
+          <p>Optimize the Device Tree blob to disable unused hardware peripherals (SPI, I2C, UART, etc.) at the firmware level.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🏗️</div>
+          <h3>Custom Buildroot Image</h3>
+          <p>Create a minimal Linux image using Buildroot that includes only the exact packages your application needs — sub-second boot times achievable.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <h3>Bootchart Analysis</h3>
+          <p>Use <code>systemd-bootchart</code> or <code>bootchart2</code> to generate detailed SVG timelines of the boot process for deeper optimization.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>Parallel Service Tuning</h3>
+          <p>Analyze service dependency chains and restructure them to maximize parallel startup and minimize the critical path.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔬</div>
+          <h3>Embedded Linux Profiling</h3>
+          <p>Use ftrace, perf, and eBPF to profile the kernel boot path and identify micro-optimizations at the kernel level.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== CHANGELOG ====== -->
+    <section class="doc-section" id="changelog" data-page>
+      <div class="page-header">
+        <div class="breadcrumbs"></div>
+        <h1>Changelog</h1>
+        <p class="page-desc">Version history and release notes for the Raspberry Pi Boot Time Optimization project.</p>
+        <div class="reading-time" data-reading-time="changelog"></div>
+      </div>
+
+      <div class="changelog-item">
+        <div class="cl-version">v1.0.0 <span class="cl-date">— June 2026</span></div>
+        <span class="badge badge-green">Latest</span>
+        <ul style="margin-top:0.75rem">
+          <li>Initial release of optimization script</li>
+          <li>Automated disabling of 5 unnecessary services</li>
+          <li>Boot time verification at start and completion</li>
+          <li>Comprehensive documentation with before/after benchmarks</li>
+          <li>Interactive web demo for visual walkthrough</li>
+          <li>GitHub Pages documentation site launched</li>
+        </ul>
+      </div>
+
+      <div class="changelog-item">
+        <div class="cl-version">v0.2.0 <span class="cl-date">— May 2026</span></div>
+        <ul>
+          <li>Beta testing of service disabling logic</li>
+          <li>Benchmark collection and analysis</li>
+          <li>Added service status verification</li>
+        </ul>
+      </div>
+
+      <div class="changelog-item">
+        <div class="cl-version">v0.1.0 <span class="cl-date">— April 2026</span></div>
+        <ul>
+          <li>Initial proof of concept</li>
+          <li>Manual service analysis with systemd-analyze</li>
+          <li>Baseline measurement documentation</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ====== Page Navigation ====== -->
+    <div class="page-nav">
+      <a href="#" class="nav-prev" style="display:none"></a>
+      <a href="#" class="nav-next" style="display:none"></a>
+    </div>
+
+  </main>
+
+  <!-- ====== TOC ====== -->
+  <aside class="toc">
+    <div class="toc-label">On This Page</div>
+    <div class="toc-links"><div class="toc-empty">No headings</div></div>
+  </aside>
+
+</div>
+
+<!-- ====== Back to Top ====== -->
+<button id="back-to-top" aria-label="Back to top">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+</button>
+
+<!-- ====== Scripts ====== -->
+<script src="js/theme.js"></script>
+<script src="js/terminal.js"></script>
+<script src="js/search.js"></script>
+<script src="js/main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    SearchSystem.init();
+    // FAQ accordion
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.faq-item').classList.toggle('open');
+      });
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+title: Raspberry Pi Boot Time Optimization
+description: Reduce boot time by up to 66% — comprehensive documentation, guides, benchmarks, and interactive demos for optimizing Raspberry Pi startup performance.
+theme: null
+include:
+  - assets
