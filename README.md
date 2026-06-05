@@ -136,4 +136,33 @@ Through this project, I learned:
 
 ---
 
+## Contributors
+
+### Ajay Duraisamy
+
+**Role:** Documentation & Deployment
+
+**Contributions:**
+
+* Project documentation
+* GitHub repository management
+* GitHub Pages hosting
+* Website development for project showcase
+
+
+### C. P. Ravi (@raviembedded3-stack)
+
+**Role:** Embedded Developer
+
+**Contributions:**
+
+* Linux boot time analysis
+* systemd service optimization
+* Project presentation and reporting
+* Shell script development
+* Raspberry Pi testing
+* Performance benchmarking
+* Boot time reduction implementation
+
+
 
